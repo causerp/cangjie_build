@@ -434,5 +434,4 @@ ls -lh $WORKSPACE/software
    # Hello, Cangjie
    ```
 
-🎉 恭喜您成功构建并运行了了仓颉SDK并运行了Hello, Cangjie程序！
-   
+🎉 恭喜您成功构建了仓颉SDK并运行了Hello, Cangjie程序！
