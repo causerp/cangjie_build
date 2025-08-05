@@ -87,6 +87,10 @@ cd $BUILD_ROOT;
 wget https://github.com/mstorsjo/llvm-mingw/archive/refs/tags/20220906.tar.gz -q --no-check-certificate;
 tar xf 20220906.tar.gz;
 cd llvm-mingw-20220906
+git init llvm-project && cd llvm-project;
+git remote add origin https://gitee.com/openharmony/third_party_llvm-project.git;
+git fetch --depth 1 origin 5c68a1cb123161b54b72ce90e7975d95a8eaf2a4 && git checkout FETCH_HEAD;
+cd .. && git clone https://gitee.com/openharmony/third_party_mingw-w64.git mingw-w64;
 export TOOLCHAIN_ARCHS=x86_64
 ./build-llvm.sh ${INSTALL_PATH} --disable-lldb
 ./strip-llvm.sh ${INSTALL_PATH}
