@@ -39,9 +39,9 @@ graph LR
 > 您可以自己搭建相关构建环境，也可以基于我们提供的Docker环境进行仓颉构建，里面已内置所有构建仓颉所需的系统工具和构建工具：
 >
 > ```bash
-> docker pull swr.cn-north-4.myhuaweicloud.com/cj-docker/cangjie_ubuntu22_x86_kernel:v1.2
+> docker pull swr.cn-north-4.myhuaweicloud.com/cj-docker/cangjie_ubuntu22_x86_kernel:v1.81
 > # 或
-> docker pull swr.cn-north-4.myhuaweicloud.com/cj-docker/cangjie_ubuntu22_arm_kernel:v1.2
+> docker pull swr.cn-north-4.myhuaweicloud.com/cj-docker/cangjie_ubuntu22_arm_kernel:v1.81
 > ```
 
 ### 2.2 系统工具安装
@@ -78,131 +78,44 @@ graph LR
 export BUILD_ROOT=/opt/buildtools;
 sudo mkdir -p $BUILD_ROOT;
 sudo chown $USER:$USER $BUILD_ROOT;
+export INSTALL_PATH=${BUILD_ROOT}/llvm-mingw-w64
+export tmp_cpus=$(grep -w processor /proc/cpuinfo|wc -l);
+
 cd $BUILD_ROOT;
-tmp_cpus=$(grep -w processor /proc/cpuinfo|wc -l);
-wget http://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.2.1.tar.bz2 --no-check-certificate;
-wget http://gcc.gnu.org/pub/gcc/infrastructure/mpfr-4.1.0.tar.bz2 --no-check-certificate;
-wget http://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.2.1.tar.gz --no-check-certificate;
-wget http://gcc.gnu.org/pub/gcc/infrastructure/isl-0.24.tar.bz2 --no-check-certificate;
-wget https://gcc.gnu.org/pub/gcc/releases/gcc-10.3.0/gcc-10.3.0.tar.gz --no-check-certificate;
-wget https://gcc.gnu.org/pub/binutils/releases/binutils-2.41.tar.gz --no-check-certificate;
-wget https://github.com/mingw-w64/mingw-w64/archive/refs/tags/v11.0.1.tar.gz --no-check-certificate;
-wget https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz --no-check-certificate;
-wget https://ftp.gnu.org/gnu/texinfo/texinfo-6.8.tar.gz --no-check-certificate;
-wget https://github.com/openssl/openssl/archive/refs/tags/openssl-3.0.9.tar.gz -q --no-check-certificate;
 
-tar xf gmp-6.2.1.tar.bz2;
-tar xf mpfr-4.1.0.tar.bz2;
-tar xf mpc-1.2.1.tar.gz;
-tar xf isl-0.24.tar.bz2;
-tar xf gcc-10.3.0.tar.gz;
-tar xf binutils-2.41.tar.gz;
-tar xf v11.0.1.tar.gz;
-tar xf libffi-3.4.2.tar.gz;
-tar xf texinfo-6.8.tar.gz;
-tar xf openssl-3.0.9.tar.gz;
-
-cp gmp-6.2.1.tar.bz2 mpfr-4.1.0.tar.bz2 mpc-1.2.1.tar.gz isl-0.24.tar.bz2 gcc-10.3.0;
-export install_dir=$BUILD_ROOT/mingw-w64;
-mkdir -p $install_dir;
-
-# prepare build envs
-src_root=$(pwd);
-tmp_cpus=$(grep -w processor /proc/cpuinfo|wc -l);
-CFLAG_BASE="-O2 -pipe -fno-ident";
-CXXFLAGS_BASE="-O2 -pipe -fno-ident -std=c++17";
-export PATH="$install_dir/bin:$PATH";
-export CFLAGS="$CFLAGS_BASE -Wl,-z,now -fPIE -pie -fstack-protector-all -s";
-export CXXFLAGS="$CXXFLAGS_BASE -Wl,-z,now -fPIE pie -fstack-protector-all -s";
-export LDFLAGS="-pipe -fno-ident";
-
-# build texinfo
-cd "$src_root/texinfo-6.8";
-mkdir -p build;
-cd build;
-../configure --prefix="$src_root/texinfo";
-make -j $tmp_cpus > build.log;
-make install > install.log;
-export PATH="$src_root/texinfo/bin:$PATH";
-
-# build binutils
-cd "$src_root/binutils-2.41";
-mkdir build;
-cd build;
-../configure --prefix="$install_dir" --disable-shared --enable-static --with-sysroot="$install_dir" --target=x86_64-w64-mingw32 --disable-nls --enable-lto --disable-gdb;
-
-make -j $tmp_cpus > build.log;
-make install > install.log;
-
-# build mingw-w64-headers
-export CFLAGS="$CFLAG_BASE";
-export CXXFLAGS="$CXXFLAG_BASE";
-cd "$src_root/mingw-w64-11.0.1";
-mkdir header-build;
-cd header-build;
-../mingw-w64-headers/configure --build=x86_64-pc-linux-gnu --host=x86_64-w64-mingw32 --prefix="$install_dir/x86_64-w64-mingw32" --with-default-msvcrt=msvcrt;
-make install;
-
-# build gcc
-cd "$src_root/gcc-10.3.0";
-sed -i 's/gmp-6.1.0.tar.bz2/gmp-6.2.1.tar.bz2/g' ./contrib/download_prerequisites;
-sed -i 's/mpfr-3.1.4.tar.bz2/mpfr-4.1.0.tar.bz2/g' ./contrib/download_prerequisites;
-sed -i 's/mpc-1.0.3.tar.gz/mpc-1.2.1.tar.gz/g' ./contrib/download_prerequisites;
-sed -i 's/isl-0.18.tar.bz2/isl-0.24.tar.bz2/g' ./contrib/download_prerequisites;
-./contrib/download_prerequisites --no-verify;
-sed -i 's/$(CFLAGS)/-g -O2 -fstack-protector-strong/g' libstdc++-v3/Makefile.in;
-sed -i 's/$(CXXFLAGS)/-g -O2 -fstack-protector-strong/g' libstdc++-v3/Makefile.in;
-sed -i 's/-fno-stack-protector/-fstack-protector-strong/g' libgcc/Makefile.in;
-mkdir build;
-cd build;
-../configure --target=x86_64-w64-mingw32 --disable-multilib --prefix="$install_dir" --enable-languages=c,c++ --disable-nls --enable-threads=posix --enable-lib64 --disable-lib32;
-make -j $tmp_cpus all-gcc > build.log;
-make install-gcc > install.log;
-
-# build mingw-w64-crt
-cd "$src_root/mingw-w64-11.0.1";
-mkdir crt-build;
-cd crt-build;
-../mingw-w64-crt/configure --build=x86_64-pc-linux-gnu --host=x86_64-w64-mingw32 --prefix="$install_dir/x86_64-w64-mingw32" --with-default-msvcrt=msvcrt --with-sysroot="$install_dir/x86_64-w64-mingw32" --enable-lib64 --disable-lib32 --enable-wildcard;
-make -j $tmp_cpus > build.log;
-make install > install.log;
-
-# build winpthreads
-cd "$src_root/mingw-w64-11.0.1";
-mkdir -p winpthreads-build;
-cd winpthreads-build;
-../mingw-w64-libraries/winpthreads/configure --build=x86_64-pc-linux-gnu --host=x86_64-w64-mingw32 --prefix="$install_dir/x86_64-w64-mingw32";
-make -j $tmp_cpus > build.log;
-make install > install.log;
-
-# finish build gcc
-cd "$src_root/gcc-10.3.0/build";
-make -j $tmp_cpus > build.log;
-make install > install.log;
-touch "$install_dir/lib/gcc/x86_64-w64-mingw32/10.3.0/libgcc_eh.a";
-
-# building windows-native binutils
-cd "$src_root/binutils-2.41";
-mkdir -p native-build;
-cd native-build;
-../configure --prefix="$install_dir/x86_64-w64-mingw32" --disable-shared --enable-static --host=x86_64-w64-mingw32 --target=x86_64-w64-mingw32 --disable-multilib --disable-nls --enable-lto --disable-gdb --enable-64-bit-bfd --enable-plugins --enable-gold --disable-rpath;
-make -j $tmp_cpus > build.log;
-make install > install.log;
+# install mingw llvm toolchain
+wget https://github.com/mstorsjo/llvm-mingw/archive/refs/tags/20220906.tar.gz -q --no-check-certificate;
+tar xf 20220906.tar.gz;
+cd llvm-mingw-20220906
+export TOOLCHAIN_ARCHS=x86_64
+./build-llvm.sh ${INSTALL_PATH} --disable-lldb
+./strip-llvm.sh ${INSTALL_PATH}
+./install-wrappers.sh ${INSTALL_PATH}
+./build-mingw-w64.sh ${INSTALL_PATH} --with-default-msvcrt=msvcrt
+./build-mingw-w64-tools.sh ${INSTALL_PATH}
+./build-compiler-rt.sh ${INSTALL_PATH}
+./build-libcxx.sh ${INSTALL_PATH}
+./build-mingw-w64-libraries.sh ${INSTALL_PATH}
+cp ${INSTALL_PATH}/x86_64-w64-mingw32/lib/libmingwex.a ${INSTALL_PATH}/x86_64-w64-mingw32/lib/libssp.a
+cp ${INSTALL_PATH}/x86_64-w64-mingw32/lib/libmingwex.a ${INSTALL_PATH}/x86_64-w64-mingw32/lib/libssp_nonshared.a
 
 # build openssl
+wget https://github.com/openssl/openssl/archive/refs/tags/openssl-3.0.9.tar.gz -q --no-check-certificate;
+tar xf openssl-3.0.9.tar.gz;
 cd "$src_root/openssl-openssl-3.0.9";
 mkdir build;
 cd build;
-../Configure mingw64 --prefix="$install_dir/x86_64-w64-mingw32" --cross-compile-prefix=x86_64-w64-mingw32- --libdir=lib;
+../Configure mingw64 --prefix="${INSTALL_PATH}/x86_64-w64-mingw32" --cross-compile-prefix=x86_64-w64-mingw32- --libdir=lib;
 make -j $tmp_cpus > build.log;
 make install > install.log;
 ```
+
 ### 2.4 设置环境变量
 
 请务必在构建前配置以下环境变量：
 
 ```bash
-export MINGW_PATH=${BUILD_ROOT}/mingw-w64
+export MINGW_PATH=${BUILD_ROOT}/llvm-mingw-w64
 export PATH=${MINGW_PATH}/bin:/usr/lib/llvm-15/bin:$PATH; # 用于将mingw、clang-15加入环境变量
 # 以下变量仅影响文件名
 export CANGJIE_VERSION=1.0.0
