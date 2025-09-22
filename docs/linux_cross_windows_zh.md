@@ -106,7 +106,7 @@ cp ${INSTALL_PATH}/x86_64-w64-mingw32/lib/libmingwex.a ${INSTALL_PATH}/x86_64-w6
 # build openssl
 wget https://github.com/openssl/openssl/archive/refs/tags/openssl-3.0.9.tar.gz -q --no-check-certificate;
 tar xf openssl-3.0.9.tar.gz;
-cd "$src_root/openssl-openssl-3.0.9";
+cd "$BUILD_ROOT/openssl-openssl-3.0.9";
 mkdir build;
 cd build;
 ../Configure mingw64 --prefix="${INSTALL_PATH}/x86_64-w64-mingw32" --cross-compile-prefix=x86_64-w64-mingw32- --libdir=lib;
@@ -152,12 +152,12 @@ git clone https://gitcode.com/Cangjie/cangjie_stdx.git;
 ### 4.1 编译仓颉编译器和调试器
 
 ```bash
-# 编译linux x64 host
+# 编译linux x64 compiler
 cd ${WORKSPACE}/cangjie_compiler;
 python3 build.py clean;
 python3 build.py build -t release --no-tests;
 
-# 编译windows sdk
+# 编译windows compiler + cjdb
 export CMAKE_PREFIX_PATH=${MINGW_PATH}/x86_64-w64-mingw32;
 python3 build.py build -t release \
   --product cjc \
@@ -187,12 +187,23 @@ cjc -v;
 
 ```bash
 cd ${WORKSPACE}/cangjie_runtime/runtime;
+mkdir target;
+
+# 编译linux x64 runtime
+python3 build.py clean;
+python3 build.py build -t release -v ${CANGJIE_VERSION};
+python3 build.py install;
+cp -rf ${WORKSPACE}/cangjie_runtime/runtime/output/* target;
+cp -rf ${WORKSPACE}/cangjie_runtime/runtime/output/common/linux_release_x86_64/{lib,runtime} ${WORKSPACE}/cangjie_compiler/output;
+
+# 编译windows x64 runtime
 python3 build.py clean;
 python3 build.py build -t release \
   --target windows-x86_64 \
   --target-toolchain ${MINGW_PATH}/bin \
   -v ${CANGJIE_VERSION};
 python3 build.py install;
+cp -rf ${WORKSPACE}/cangjie_runtime/runtime/output/* target;
 cp -rf ${WORKSPACE}/cangjie_runtime/runtime/output/common/windows_release_x86_64/{lib,runtime} ${WORKSPACE}/cangjie_compiler/output;
 cp -rf ${WORKSPACE}/cangjie_runtime/runtime/output/common/windows_release_x86_64/{lib,runtime} ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32;
 ```
@@ -201,10 +212,19 @@ cp -rf ${WORKSPACE}/cangjie_runtime/runtime/output/common/windows_release_x86_64
 
 ```bash
 cd ${WORKSPACE}/cangjie_runtime/std;
+# 编译linux x64 std
+python3 build.py clean;
+python3 build.py build -t release \
+  --target-lib=$WORKSPACE/cangjie_runtime/runtime/target \
+  --target-lib=$OPENSSL_PATH;
+python3 build.py install;
+cp -rf ${WORKSPACE}/cangjie_runtime/std/output/* ${WORKSPACE}/cangjie_compiler/output/;
+
+# 编译windows x64 std
 python3 build.py clean;
 python3 build.py build -t release \
   --target windows-x86_64 \
-  --target-lib=${WORKSPACE}/cangjie_runtime/runtime/output \
+  --target-lib=${WORKSPACE}/cangjie_runtime/runtime/target \
   --target-lib=${MINGW_PATH}/x86_64-w64-mingw32/lib \
   --target-sysroot ${MINGW_PATH}/ \
   --target-toolchain ${MINGW_PATH}/bin;
