@@ -152,13 +152,12 @@ cp -R $WORKSPACE/cangjie_runtime/runtime/output/common/darwin_release_${ARCH}/{l
 ### 4.3 编译仓颉标准库
 
 ```bash
-cd $WORKSPACE/cangjie_runtime/std;
+cd $WORKSPACE/cangjie_runtime/stdlib;
 python3 build.py clean;
 python3 build.py build -t release \
-  --target-lib=$WORKSPACE/cangjie_runtime/runtime/output \
-  --target-lib=$OPENSSL_PATH;
+  --target-lib=$WORKSPACE/cangjie_runtime/runtime/output
 python3 build.py install;
-cp -R $WORKSPACE/cangjie_runtime/std/output/* $WORKSPACE/cangjie_compiler/output/;
+cp -R $WORKSPACE/cangjie_runtime/stdlib/output/* $WORKSPACE/cangjie_compiler/output/;
 ```
 
 ### 4.4 编译 STDX 扩展库
@@ -167,8 +166,7 @@ cp -R $WORKSPACE/cangjie_runtime/std/output/* $WORKSPACE/cangjie_compiler/output
 cd $WORKSPACE/cangjie_stdx;
 python3 build.py clean;
 python3 build.py build -t release \
-  --include=$WORKSPACE/cangjie_compiler/include \
-  --target-lib=$OPENSSL_PATH;
+  --include=$WORKSPACE/cangjie_compiler/include
 python3 build.py install;
 export CANGJIE_STDX_PATH=$WORKSPACE/cangjie_stdx/target/darwin_${ARCH}_cjnative/static/stdx;
 ```
