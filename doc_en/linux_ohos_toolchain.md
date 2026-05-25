@@ -1,32 +1,33 @@
-# ohos-x86_64、ohos-aarch64工具链
-说明：本教程将构建出OHOS SDK中宿主平台无关部分的工具链，其将在 [Linux OHOS 构建指导](linux_ohos_zh.md)、[Linux ->Windows(OHOS) 交叉构建指导](linux_cross_windows_ohos_zh.md)、[macOS OHOS 构建指导](macos_ohos_zh.md) 上分别被打包进各自的完整SDK中。
+# ohos-x86_64, ohos-aarch64 Toolchain
 
-## 1 环境准备
+Note: This tutorial will build the host-platform-independent part of the OHOS SDK toolchain, which will be packaged into their respective complete SDKs in [Linux OHOS Build Guide](linux_ohos.md), [Linux -> Windows (OHOS) Cross Build Guide](linux_cross_windows_ohos.md), and [macOS OHOS Build Guide](macos_ohos.md).
 
-### 1.1 系统要求
+## 1 Environment Preparation
 
-- **操作系统**: 以 Ubuntu 22.04 LTS 作为示例，其他版本也可以参考本文流程
+### 1.1 System Requirements
 
-- **磁盘空间**: ≥200GB
-- **内存**: ≥8GB (物理内存+交换空间)
-- **用户权限**: 普通用户+sudo权限
-- **芯片指令集**：x86_64
+- **Operating System**: Ubuntu 22.04 LTS as an example, other versions can also refer to this process
 
-### 1.2 系统工具安装
+- **Disk Space**: ≥200GB
+- **Memory**: ≥8GB (physical memory + swap space)
+- **User Permissions**: Regular user + sudo privileges
+- **CPU Architecture**: x86_64
 
-- 使用华为镜像源(可选)
+### 1.2 System Tools Installation
+
+- Using Huawei Mirror Source (Optional)
 
 ```bash
-  # 1.备份配置文件：
+  # 1. Backup configuration file:
   sudo cp -a /etc/apt/sources.list /etc/apt/sources.list.bak;
-  # 2.修改sources.list文件，将http://archive.ubuntu.com和http://security.ubuntu.com替换成http://mirrors.huaweicloud.com，可以参考如下命令：
+  # 2. Modify sources.list file, replace http://archive.ubuntu.com and http://security.ubuntu.com with http://mirrors.huaweicloud.com, you can refer to the following command:
   sudo sed -i "s@http://.*archive.ubuntu.com@http://mirrors.huaweicloud.com@g" /etc/apt/sources.list;
   sudo sed -i "s@http://.*security.ubuntu.com@http://mirrors.huaweicloud.com@g" /etc/apt/sources.list;
-  # 3.更新索引
+  # 3. Update index
   sudo apt-get update;
 ```
 
-- 安装系统工具
+- Install System Tools
 
 ```bash
 sudo apt update && sudo apt install -y --no-install-recommends \
@@ -45,21 +46,21 @@ xsltproc bc ruby gcc-aarch64-linux-gnu libxcursor-dev libxrandr-dev libxinerama-
 gcc g++ clang libgmp-dev libmpfr-dev libmpc-dev;
 ```
 
-## 2 编译ohos_aarch64、ohos_x86-64工具链
+## 2 Build ohos_aarch64, ohos_x86-64 Toolchain
 
-### 2.1 创建工作区
+### 2.1 Create Workspace
 
-**<font color="red">\* 下方示例的`/path/to/workspace`需更换为您构建ohos的工作目录</font>**
+**<font color="red">\* Replace `/path/to/workspace` in the example below with your workspace directory for building OHOS</font>**
 
 ```bash
 export WORKSPACE=/path/to/workspace
 mkdir -p $WORKSPACE;
 cd $WORKSPACE;
-# 在执行prebuilts_download.sh的时候会在上层创建存放ohos相关二进制目录，这里创建一个source目录用于存放ohos源码
+# When executing prebuilts_download.sh, it will create a directory for OHOS-related binaries in the parent directory, so create a source directory here to store OHOS source code
 mkdir source;
 ```
 
-### 2.2 repo下载
+### 2.2 Download repo
 ```bash
 cd $WORKSPACE;
 curl https://gitee.com/oschina/repo/raw/fork_flow/repo-py3 -o repo;
@@ -67,20 +68,20 @@ chmod a+x repo;
 pip3 install -i https://repo.huaweicloud.com/repository/pypi/simple requests;
 ```
 
-### 2.3 OHOS源码下载
+### 2.3 Download OHOS Source Code
 
 ```bash
 cd ${WORKSPACE}/source;
-# 请在命令执行前配置git user.name和user.email
-# 如果有报python找不到错的话将`#!/usr/bin/env python` 改成 `#!/usr/bin/env python3`
+# Please configure git user.name and user.email before executing the command
+# If you get a python not found error, change `#!/usr/bin/env python` to `#!/usr/bin/env python3`
 ${WORKSPACE}/repo init -u https://gitee.com/openharmony/manifest.git -b master --no-repo-verify;
 ${WORKSPACE}/repo sync -c;
 ```
 
-### 2.4 交叉编译ohos musl
+### 2.4 Cross-compile OHOS musl
 
 ```bash
-# vim third_party/musl/BUILD.gn, 在最后加上下面代码
+# vim third_party/musl/BUILD.gn, add the following code at the end
 group("all_musls") {
   deps = [
     ":soft_libc_musl_shared(//build/toolchain/ohos:ohos_clang_arm64)",
@@ -89,16 +90,16 @@ group("all_musls") {
 }
 ```
 ```bash
-# 执行musl构建
+# Execute musl build
 cd ${WORKSPACE}/source;
 ./build/prebuilts_download.sh;
 ./build.sh --product-name rk3568 --build-target all_musls;
 ```
 
-### 2.5 交叉编译ohos openssl
+### 2.5 Cross-compile OHOS openssl
 
 ```bash
-# vim third_party/openssl/BUILD.gn, 在最后加上下面代码
+# vim third_party/openssl/BUILD.gn, add the following code at the end
 group("all_ssl") {
   deps = [
     ":libcrypto_static(//build/toolchain/ohos:ohos_clang_arm64)",
@@ -115,20 +116,20 @@ group("all_ssl") {
 }
 ```
 ```bash
-# 执行构建
+# Execute build
 cd ${WORKSPACE}/source;
 ./build.sh --product-name rk3568 --build-target all_ssl;
 ```
 
-### 2.6 构建ohos-sdk所需工具链
+### 2.6 Build Toolchain Required for ohos-sdk
 ```bash
 cd ${WORKSPACE}/source;
 ./build.sh --product-name ohos-sdk --ccache;
 ```
 
-### 2.7 拷贝工具链
+### 2.7 Copy Toolchain
 ```bash
-# OHOS_ROOT环境变量指定为您用于保存 ohos 工具链的路径
+# OHOS_ROOT environment variable specifies the path you use to save the OHOS toolchain
 export OHOS_ROOT=/opt/buildtools/ohos_root;
 cd ${WORKSPACE}/source;
 
@@ -160,10 +161,11 @@ cp -r prebuilts/clang/ohos/linux-x86_64/llvm/lib/x86_64-linux-ohos/libc++.* ${OH
 cp -r prebuilts/clang/ohos/linux-x86_64/llvm/lib/aarch64-linux-ohos/libc++.* ${OHOS_ROOT}/out/sdk/obj/third_party/musl/sysroot/usr/lib/aarch64-linux-ohos/;
 
 mkdir -p ${OHOS_ROOT}/prebuilts/clang/ohos;
-# 如果 mac arm 平台，拷贝如下
+# If mac arm platform, copy as follows
 cp -r prebuilts/clang/ohos/darwin-aarch64 ${OHOS_ROOT}/prebuilts/clang/ohos;
-# 如果 mac x86_64平台，拷贝如下
+# If mac x86_64 platform, copy as follows
 cp -r prebuilts/clang/ohos/darwin-x86_64 ${OHOS_ROOT}/prebuilts/clang/ohos;
-# 如果 linux 平台， 拷贝如下
+# If linux platform, copy as follows
 cp -r prebuilts/clang/ohos/linux-x86_64 ${OHOS_ROOT}/prebuilts/clang/ohos;
 ```
+
