@@ -27,9 +27,11 @@ kanban
     M[编译cjtrace-recover工具]
     N[编译hle工具]
     O[编译lspserver工具]
+    P[编译cjprof工具]
+    Q[编译互操作库]
   5.打包和验证
-    P[组织并打包文件]
-    Q[编译Hello,Cangjie程序]
+    R[组织并打包文件]
+    S[编译Hello,Cangjie程序]
 ```
 
 ### 1.2 关键注意事项
@@ -100,9 +102,9 @@ wget https://github.com/mstorsjo/llvm-mingw/archive/refs/tags/20220906.tar.gz -q
 tar xf 20220906.tar.gz;
 cd llvm-mingw-20220906
 git init llvm-project && cd llvm-project;
-git remote add origin https://gitee.com/openharmony/third_party_llvm-project.git;
+git remote add origin https://gitcode.com/openharmony/third_party_llvm-project.git;
 git fetch --depth 1 origin 5c68a1cb123161b54b72ce90e7975d95a8eaf2a4 && git checkout FETCH_HEAD;
-cd .. && git clone https://gitee.com/openharmony/third_party_mingw-w64.git mingw-w64;
+cd .. && git clone https://gitcode.com/openharmony/third_party_mingw-w64.git mingw-w64;
 export TOOLCHAIN_ARCHS=x86_64
 ./build-llvm.sh ${INSTALL_PATH} --disable-lldb
 ./strip-llvm.sh ${INSTALL_PATH}
@@ -217,10 +219,10 @@ cd $WORKSPACE;
 ### 3.2 获取仓颉源码
 
 ```bash
-git clone https://gitcode.com/Cangjie/cangjie_compiler.git -b dev;
-git clone https://gitcode.com/Cangjie/cangjie_runtime.git -b dev;
-git clone https://gitcode.com/Cangjie/cangjie_tools.git -b dev;
-git clone https://gitcode.com/Cangjie/cangjie_stdx.git -b dev;
+git clone https://gitcode.com/Cangjie/cangjie_compiler.git -b main;
+git clone https://gitcode.com/Cangjie/cangjie_runtime.git -b main;
+git clone https://gitcode.com/Cangjie/cangjie_tools.git -b main;
+git clone https://gitcode.com/Cangjie/cangjie_stdx.git -b main;
 ```
 
 ## 4 编译流程
@@ -324,15 +326,15 @@ python3 build.py build -t release \
   --target-sysroot ${MINGW_PATH}/ \
   --target-toolchain ${MINGW_PATH}/bin;
 python3 build.py build -t release \
-    --target ohos-x86_64 \
-    --target-lib=${WORKSPACE}/cangjie_runtime/runtime/output \
-    --target-toolchain ${OHOS_ROOT}/prebuilts/clang/ohos/linux-${ARCH}/llvm/bin \
-    --target-sysroot ${OHOS_ROOT}/out/sdk/obj/third_party/musl/sysroot;
+  --target ohos-x86_64 \
+  --target-lib=${WORKSPACE}/cangjie_runtime/runtime/output \
+  --target-toolchain ${OHOS_ROOT}/prebuilts/clang/ohos/linux-${ARCH}/llvm/bin \
+  --target-sysroot ${OHOS_ROOT}/out/sdk/obj/third_party/musl/sysroot;
 python3 build.py build -t release \
-    --target ohos-aarch64 \
-    --target-lib=${WORKSPACE}/cangjie_runtime/runtime/output \
-    --target-toolchain ${OHOS_ROOT}/prebuilts/clang/ohos/linux-${ARCH}/llvm/bin \
-    --target-sysroot ${OHOS_ROOT}/out/sdk/obj/third_party/musl/sysroot;
+  --target ohos-aarch64 \
+  --target-lib=${WORKSPACE}/cangjie_runtime/runtime/output \
+  --target-toolchain ${OHOS_ROOT}/prebuilts/clang/ohos/linux-${ARCH}/llvm/bin \
+  --target-sysroot ${OHOS_ROOT}/out/sdk/obj/third_party/musl/sysroot;
 python3 build.py install;
 cp -rf output/* ${WORKSPACE}/cangjie_compiler/output/;
 cp -rf output/* ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/;
@@ -345,9 +347,10 @@ cd ${WORKSPACE}/cangjie_stdx;
 python3 build.py clean;
 python3 build.py build -t release \
   --target-lib=${MINGW_PATH}/x86_64-w64-mingw32/lib \
-	--target windows-x86_64 \
+  --target windows-x86_64 \
   --target-sysroot ${MINGW_PATH}/ \
-  --target-toolchain ${MINGW_PATH}/bin;
+  --target-toolchain ${MINGW_PATH}/bin \
+  --include=${WORKSPACE}/cangjie_compiler/include;
 python3 build.py install;
 export CANGJIE_STDX_PATH=${WORKSPACE}/cangjie_stdx/target/windows_x86_64_cjnative/static/stdx;
 ```
@@ -394,7 +397,7 @@ cp $WORKSPACE/cangjie_tools/cjlint/dist/config/*       ${WORKSPACE}/cangjie_comp
 ```bash
 cd ${WORKSPACE}/cangjie_tools/cjcov/build;
 python3 build.py clean;
-python3 build.py build -t ${build_type} --target windows-x86_64;
+python3 build.py build -t release --target windows-x86_64;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjcov/dist/cjcov.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin;
 ```
@@ -428,6 +431,16 @@ python3 build.py clean;
 python3 build.py build -t release --target windows-x86_64;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cangjie-language-server/output/bin/LSPServer.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin;
+```
+
+#### (8) cjprof
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjprof/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof.exe ${WORKSPACE}/cangjie_compiler/output/tools/bin
+cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output/tools/lib;
 ```
 
 ## 5 打包发布
