@@ -24,10 +24,11 @@ kanban
     J[编译cjfmt工具]
     O[编译lspserver工具]
     P[编译cjprof工具]
-    Q[编译互操作库]
+    Q[编译cjcompat工具]
+    R[编译互操作库]
   5.打包和验证
-    R[组织并打包文件]
-    S[编译Hello,Cangjie程序]
+    S[组织并打包文件]
+    T[编译Hello,Cangjie程序]
 ```
 
 ### 1.2 关键注意事项
@@ -279,8 +280,20 @@ cp $WORKSPACE/cangjie_tools/cjfmt/config/*.toml         ${WORKSPACE}/cangjie_com
 cd ${WORKSPACE}/cangjie_tools/cjprof/build;
 python3 build.py build -t release;
 python3 build.py install;
-cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof ${WORKSPACE}/cangjie_compiler/output/tools/bin
-cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output/tools/lib;
+cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/bin
+cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/lib;
+if [[ -d "$WORKSPACE/cangjie_tools/cjprof/static" ]]; then
+  cp -Rf $WORKSPACE/cangjie_tools/cjprof/static cangjie/tools/config;
+fi
+```
+
+#### (4) cjcompat
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjcompat/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjcompat/dist/bin/cjcompat ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/bin
 ```
 
 ## 5 组织并打包文件

@@ -27,9 +27,10 @@ kanban
     N[编译hle工具]
     O[编译lspserver工具]
     P[编译cjprof工具]
+    Q[编译cjcompat工具]
   5.打包和验证
-    Q[组织并打包文件]
-    R[编译Hello,Cangjie程序]
+    R[组织并打包文件]
+    S[编译Hello,Cangjie程序]
 ```
 
 ## 2 环境准备
@@ -272,6 +273,18 @@ python3 build.py build -t release;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof ${WORKSPACE}/cangjie_compiler/output/tools/bin
 cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output/tools/lib;
+if [[ -d "$WORKSPACE/cangjie_tools/cjprof/static" ]]; then
+  cp -Rf $WORKSPACE/cangjie_tools/cjprof/static cangjie/tools/config;
+fi
+```
+
+#### (9) cjcompat
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjcompat/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjcompat/dist/bin/cjcompat ${WORKSPACE}/cangjie_compiler/output/tools/bin
 ```
 
 ## 5 组织并打包文件

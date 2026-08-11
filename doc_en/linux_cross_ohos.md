@@ -22,9 +22,10 @@ kanban
   4.Toolset Build Phase
     I[Build cjpm Tool]
     J[Build cjfmt Tool]
+    K[Build cjcompat Tool]
   5.Packaging and Verification
-    K[Organize and<br>Package Files]
-    L[Build Hello,<br>Cangjie Program]
+    L[Organize and<br>Package Files]
+    M[Build Hello,<br>Cangjie Program]
 ```
 
 ### 1.2 Key Notes
@@ -267,6 +268,28 @@ python3 build.py build -t release --target ohos-aarch64 --target-sysroot ${OHOS_
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjfmt/build/build/bin/cjfmt ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/bin;
 cp $WORKSPACE/cangjie_tools/cjfmt/config/*.toml         ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/config;
+```
+
+#### (3) cjprof
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjprof/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/bin
+cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/lib;
+if [[ -d "$WORKSPACE/cangjie_tools/cjprof/static" ]]; then
+  cp -Rf $WORKSPACE/cangjie_tools/cjprof/static cangjie/tools/config;
+fi
+```
+
+#### (4) cjcompat
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjcompat/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjcompat/dist/bin/cjcompat ${WORKSPACE}/cangjie_compiler/output-aarch64-linux-ohos/tools/bin
 ```
 
 ## 5 Organize and Package Files

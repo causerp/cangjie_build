@@ -28,10 +28,11 @@ kanban
     N[Build hle Tool]
     O[Build lspserver Tool]
     P[Build cjprof Tool]
-    Q[Build Interop Library]
+    Q[Build cjcompat Tool]
+    R[Build Interop Library]
   5.Packaging and Verification
-    R[Organize and<br>Package Files]
-    S[Build Hello,<br>Cangjie Program]
+    S[Organize and<br>Package Files]
+    T[Build Hello,<br>Cangjie Program]
 ```
 
 ### 1.2 Key Notes
@@ -387,9 +388,21 @@ python3 build.py build -t release;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof ${WORKSPACE}/cangjie_compiler/output/tools/bin
 cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output/tools/lib
+if [[ -d "$WORKSPACE/cangjie_tools/cjprof/static" ]]; then
+  cp -Rf $WORKSPACE/cangjie_tools/cjprof/static cangjie/tools/config;
+fi
 ```
 
-#### (9) Java Interop
+#### (9) cjcompat
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjcompat/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjcompat/dist/bin/cjcompat ${WORKSPACE}/cangjie_compiler/output/tools/bin
+```
+
+#### (10) Java Interop
 
 ```bash
 cd ${WORKSPACE}/cangjie_multiplatform_interop/java/build
