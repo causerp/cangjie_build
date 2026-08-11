@@ -28,10 +28,11 @@ kanban
     N[编译hle工具]
     O[编译lspserver工具]
     P[编译cjprof工具]
-    Q[编译互操作库]
+    Q[编译cjcompat工具]
+    R[编译互操作库]
   5.打包和验证
-    R[组织并打包文件]
-    S[编译Hello,Cangjie程序]
+    S[组织并打包文件]
+    T[编译Hello,Cangjie程序]
 ```
 
 ### 1.2 关键注意事项
@@ -386,8 +387,17 @@ cp $WORKSPACE/cangjie_tools/cangjie-language-server/output/bin/LSPServer.exe ${W
 cd ${WORKSPACE}/cangjie_tools/cjprof/build;
 python3 build.py build -t release;
 python3 build.py install;
-cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof.exe ${WORKSPACE}/cangjie_compiler/output/tools/bin
-cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output/tools/lib;
+cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin
+cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/lib;
+```
+
+#### (9) cjcompat
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjcompat/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjcompat/dist/bin/cjcompat.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin
 ```
 
 ## 5 打包发布

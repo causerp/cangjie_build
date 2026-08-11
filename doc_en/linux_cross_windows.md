@@ -28,9 +28,10 @@ kanban
     N[Build hle Tool]
     O[Build lspserver Tool]
     P[Build cjprof Tool]
+    Q[Build cjcompat Tool]
   5.Packaging and Verification
-    Q[Organize and<br>Package Files]
-    R[Build Hello,<br>Cangjie Program]
+    R[Organize and<br>Package Files]
+    S[Build Hello,<br>Cangjie Program]
 ```
 
 ### 1.2 Key Notes
@@ -386,6 +387,16 @@ cd ${WORKSPACE}/cangjie_tools/cjprof/build;
 python3 build.py build -t release --target windows-x86_64;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin;
+cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/lib;
+```
+
+#### (9) cjcompat
+
+```bash
+cd ${WORKSPACE}/cangjie_tools/cjcompat/build;
+python3 build.py build -t release;
+python3 build.py install;
+cp $WORKSPACE/cangjie_tools/cjcompat/dist/bin/cjcompat.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin
 ```
 
 ## 5 Package and Release
