@@ -440,6 +440,9 @@ python3 build.py build -t release --target windows-x86_64;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof.exe ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/bin;
 cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output-x86_64-w64-mingw32/tools/lib;
+if [[ -d "$WORKSPACE/cangjie_tools/cjprof/static" ]]; then
+  cp -Rf $WORKSPACE/cangjie_tools/cjprof/static cangjie/tools/config;
+fi
 ```
 
 #### (9) cjcompat

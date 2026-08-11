@@ -388,6 +388,9 @@ python3 build.py build -t release;
 python3 build.py install;
 cp $WORKSPACE/cangjie_tools/cjprof/dist/bin/cjprof ${WORKSPACE}/cangjie_compiler/output/tools/bin
 cp $WORKSPACE/cangjie_tools/cjprof/dist/lib/* ${WORKSPACE}/cangjie_compiler/output/tools/lib
+if [[ -d "$WORKSPACE/cangjie_tools/cjprof/static" ]]; then
+  cp -Rf $WORKSPACE/cangjie_tools/cjprof/static cangjie/tools/config;
+fi
 ```
 
 #### (9) cjcompat
